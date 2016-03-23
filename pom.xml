@@ -117,6 +117,7 @@
 
     <modules>
         <module>components/org.wso2.carbon.identity.user.store.remote</module>
+        <module>features/org.wso2.carbon.identity.user.store.remote.server.feature</module>
     </modules>
 
 </project>
