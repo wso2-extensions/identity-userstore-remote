@@ -124,6 +124,17 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>${org.slf4j.verison}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.identity.user.store.remote</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity</groupId>
+                <artifactId>org.wso2.carbon.identity.user.store.remote.server.feature</artifactId>
+                <version>${project.version}</version>
+                <type>zip</type>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
