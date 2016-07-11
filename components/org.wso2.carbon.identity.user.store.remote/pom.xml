@@ -87,7 +87,7 @@
                         <Export-Package>
                             !org.wso2.carbon.identity.userstore.remote.internal,
                             org.wso2.carbon.identity.user.store.remote.*;
-                            version="${identity.userstore.remote}"
+                            version="${identity.userstore.remote.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>
