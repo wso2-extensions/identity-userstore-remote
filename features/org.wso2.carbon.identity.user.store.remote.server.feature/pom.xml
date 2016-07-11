@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.user.store.remote</artifactId>
-            <version>${project.version}</version>
+            <version>${identity.userstore.remote}</version>
         </dependency>
     </dependencies>
 
