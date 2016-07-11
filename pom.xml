@@ -35,6 +35,12 @@
     </description>
     <url>http://wso2.org</url>
 
+    <modules>
+        <module>components/org.wso2.carbon.identity.user.store.remote</module>
+        <module>features/org.wso2.carbon.identity.user.store.remote.server.feature</module>
+        <module>features/org.wso2.carbon.identity.user.store.remote.feature</module>
+    </modules>
+
     <scm>
         <url>https://github.com/wso2-extensions/identity-userstore-remote.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/identity-userstore-remote.git</developerConnection>
@@ -113,6 +119,11 @@
                 <artifactId>org.wso2.carbon.logging</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${org.slf4j.verison}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -170,6 +181,7 @@
         <axis2.wso2.version>1.6.1.wso2v12</axis2.wso2.version>
         <axis2.osgi.version.range>[1.6.1.wso2v12, 2.0.0)</axis2.osgi.version.range>
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
+        <org.slf4j.verison>1.6.1</org.slf4j.verison>
 
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
