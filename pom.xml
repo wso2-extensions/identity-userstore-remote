@@ -24,7 +24,7 @@
         <version>1</version>
     </parent>
 
-    <groupId>org.wso2.carbon.identity</groupId>
+    <groupId>org.wso2.carbon.identity.userstore.remote</groupId>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>identity-userstore-remote</artifactId>
     <version>5.1.2-SNAPSHOT</version>
@@ -105,7 +105,7 @@
                 <version>${carbon.kernel.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.user.ws</groupId>
                 <artifactId>org.wso2.carbon.um.ws.api</artifactId>
                 <version>${identity.user.ws.version}</version>
             </dependency>
@@ -125,12 +125,12 @@
                 <version>${org.slf4j.verison}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.userstore.remote</groupId>
                 <artifactId>org.wso2.carbon.identity.user.store.remote</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity</groupId>
+                <groupId>org.wso2.carbon.identity.userstore.remote</groupId>
                 <artifactId>org.wso2.carbon.identity.user.store.remote.server.feature</artifactId>
                 <version>${project.version}</version>
                 <type>zip</type>
