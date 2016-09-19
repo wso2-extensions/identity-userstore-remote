@@ -35,6 +35,7 @@ import org.wso2.carbon.user.core.service.RealmService;
  * unbind="unsetRegistryService"
  */
 public class WSUserStoreDSComponent {
+
     private static Log log = LogFactory.getLog(WSUserStoreDSComponent.class);
 
     protected void activate(ComponentContext ctxt) {
@@ -59,12 +60,12 @@ public class WSUserStoreDSComponent {
         }
     }
 
-    protected void setRealmService(RealmService rlmService) {
-        return;
+    protected void setRealmService(RealmService realmService) {
+        WSUserStoreComponentHolder.getInstance().setRealmService(realmService);
     }
 
     protected void unsetRealmService(RealmService realmService) {
-        return;
+        WSUserStoreComponentHolder.getInstance().setRealmService(null);
     }
 
     public static void setRegistryService(RegistryService registryService) {

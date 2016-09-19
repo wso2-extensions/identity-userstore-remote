@@ -62,20 +62,8 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
     private static Map<Integer, String> securityTokens = new ConcurrentHashMap<>();
 
     public WSUserStoreManager() {
-    }
 
-    //    public WSUserStoreManager(RealmConfiguration realmConfig, Map<String, Object> properties,
-    //            ClaimManager claimManager, ProfileConfigurationManager profileManager, UserRealm realm,
-    //            Integer tenantId) throws UserStoreException {
-    //
-    //        if (log.isDebugEnabled()) {
-    //            log.debug("Initializing CloudWSUserStoreManager for tenantId - [" + tenantId + "]");
-    //        }
-    //        this.realmConfig = realmConfig;
-    //        this.tenantId = tenantId;
-    //        this.userRealm = realm;
-    //        this.httpClient = new HttpClient();
-    //    }
+    }
 
     public WSUserStoreManager(org.wso2.carbon.user.api.RealmConfiguration realmConfig,
             Map<String, Object> properties,
@@ -83,7 +71,11 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
             ProfileConfigurationManager profileManager,
             UserRealm realm, Integer tenantId)
             throws UserStoreException {
+
         super(realmConfig, properties, claimManager, profileManager, realm, tenantId, false);
+        this.realmConfig = realmConfig;
+        this.tenantId = tenantId;
+        this.userRealm = realm;
         this.httpClient = new HttpClient();
     }
 
@@ -133,11 +125,10 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
 
     private StringRequestEntity getAuthenticateEntity(String userName, Object password)
             throws UnsupportedEncodingException {
-        StringRequestEntity requestEntity = new StringRequestEntity(
+        return new StringRequestEntity(
                 "{\"username\":" + userName + ",\"password\":" + password + "}",
                 "application/json",
                 "UTF-8");
-        return requestEntity;
     }
 
     private StringRequestEntity getClaimRetrievalEntity(String[] propertyNames)
@@ -145,16 +136,15 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
 
         StringBuilder attStringBuilder = new StringBuilder("{\"attributes\":[");
         for (String att : propertyNames) {
-            attStringBuilder.append(", " + att);
+            attStringBuilder.append(", ").append(att);
         }
         attStringBuilder.toString().replaceFirst(",", "");
         attStringBuilder.append("]}");
 
-        StringRequestEntity requestEntity = new StringRequestEntity(
+        return new StringRequestEntity(
                 attStringBuilder.toString(),
                 "application/json",
                 "UTF-8");
-        return requestEntity;
     }
 
     public boolean doAuthenticate(String username, Object credential) throws UserStoreException {
@@ -177,13 +167,7 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
                 authStatus = (boolean) resultObj.get("authenticated");
             }
 
-        } catch (IOException e) {
-            log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
-                    + "]", e);
-        } catch (WSUserStoreException e) {
-            log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
-                    + "]", e);
-        } catch (JSONException e) {
+        } catch (IOException | WSUserStoreException | JSONException e) {
             log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
                     + "]", e);
         }
@@ -220,13 +204,7 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
                 String respStr = new String(postRequest.getResponseBody());
                 JSONObject resultObj = new JSONObject(respStr);
             }
-        } catch (IOException e) {
-            log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
-                    + "]", e);
-        } catch (WSUserStoreException e) {
-            log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
-                    + "]", e);
-        } catch (JSONException e) {
+        } catch (IOException | JSONException | WSUserStoreException e) {
             log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
                     + "]", e);
         }
@@ -234,16 +212,7 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
     }
 
     public Date getPasswordExpirationTime(String userName) throws UserStoreException {
-        // not supporting this by sample user store manager.
         return null;
-    }
-
-    @Override
-    public boolean doCheckExistingUser(String userName) throws UserStoreException {
-        if ("godwin".equals(userName)) {
-            return true;
-        }
-        return false;
     }
 
     public String[] doListUsers(String filter, int maxItemLimit) throws UserStoreException {
@@ -251,9 +220,8 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         if (log.isDebugEnabled()) {
             log.debug("Processing getListUsers request for tenantId  - [" + this.tenantId + "]");
         }
-        boolean authStatus = false;
         GetMethod getMethod = new GetMethod(EndpointUtil.getUserListEndpoint(getHostName()));
-        List<String> userList = new ArrayList<String>();
+        List<String> userList = new ArrayList<>();
         try {
 
             if (this.httpClient == null) {
@@ -270,17 +238,11 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
                 }
             }
 
-        } catch (IOException e) {
-            log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
-                    + "]", e);
-        } catch (WSUserStoreException e) {
-            log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
-                    + "]", e);
-        } catch (JSONException e) {
+        } catch (IOException | JSONException | WSUserStoreException e) {
             log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
                     + "]", e);
         }
-        return userList.toArray(new String[0]);
+        return userList.toArray(new String[userList.size()]);
     }
 
 }

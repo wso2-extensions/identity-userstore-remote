@@ -19,18 +19,16 @@ package org.wso2.carbon.identity.user.store.ws.util;
 
 public class EndpointUtil {
 
+    private static final String PROTOCOL_HTTP = "http";
     public static String getAuthenticateEndpoint(String hostName) {
-        String authenticateURL = "http://" + hostName + "/authenticate";
-        return authenticateURL;
+        return PROTOCOL_HTTP + hostName + "/authenticate";
     }
 
     public static String getUserClaimRetrievalEndpoint(String hostName, String user) {
-        String claimURL = "http://" + hostName + "/users/" + user;
-        return claimURL;
+        return "http://" + hostName + "/users/" + user;
     }
 
     public static String getUserListEndpoint(String hostName) {
-        String claimURL = "http://" + hostName + "/users";
-        return claimURL;
+        return PROTOCOL_HTTP + hostName + "/users";
     }
 }

@@ -57,26 +57,27 @@ public class DefaultJWTGenerator implements SecurityTokenBuilder {
 
     protected JWSAlgorithm mapSignatureAlgorithm(String signatureAlgorithm) throws WSUserStoreException {
 
-        if (NONE.equals(signatureAlgorithm)) {
-            return new JWSAlgorithm(JWSAlgorithm.NONE.getName());
-        } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
-            return JWSAlgorithm.RS256;
-        } else if (SHA384_WITH_RSA.equals(signatureAlgorithm)) {
-            return JWSAlgorithm.RS384;
-        } else if (SHA512_WITH_RSA.equals(signatureAlgorithm)) {
-            return JWSAlgorithm.RS512;
-        } else if (SHA256_WITH_HMAC.equals(signatureAlgorithm)) {
-            return JWSAlgorithm.HS256;
-        } else if (SHA384_WITH_HMAC.equals(signatureAlgorithm)) {
-            return JWSAlgorithm.HS384;
-        } else if (SHA512_WITH_HMAC.equals(signatureAlgorithm)) {
-            return JWSAlgorithm.HS512;
-        } else if (SHA256_WITH_EC.equals(signatureAlgorithm)) {
-            return JWSAlgorithm.ES256;
-        } else if (SHA384_WITH_EC.equals(signatureAlgorithm)) {
-            return JWSAlgorithm.ES384;
-        } else if (SHA512_WITH_EC.equals(signatureAlgorithm)) {
-            return JWSAlgorithm.ES512;
+        switch (signatureAlgorithm) {
+            case NONE:
+                return new JWSAlgorithm(JWSAlgorithm.NONE.getName());
+            case SHA256_WITH_RSA:
+                return JWSAlgorithm.RS256;
+            case SHA384_WITH_RSA:
+                return JWSAlgorithm.RS384;
+            case SHA512_WITH_RSA:
+                return JWSAlgorithm.RS512;
+            case SHA256_WITH_HMAC:
+                return JWSAlgorithm.HS256;
+            case SHA384_WITH_HMAC:
+                return JWSAlgorithm.HS384;
+            case SHA512_WITH_HMAC:
+                return JWSAlgorithm.HS512;
+            case SHA256_WITH_EC:
+                return JWSAlgorithm.ES256;
+            case SHA384_WITH_EC:
+                return JWSAlgorithm.ES384;
+            case SHA512_WITH_EC:
+                return JWSAlgorithm.ES512;
         }
         throw new WSUserStoreException("Unsupported Signature Algorithm in identity.xml");
     }
