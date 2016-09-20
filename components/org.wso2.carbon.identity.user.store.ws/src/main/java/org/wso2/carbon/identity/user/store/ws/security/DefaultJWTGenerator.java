@@ -50,6 +50,7 @@ public class DefaultJWTGenerator implements SecurityTokenBuilder {
     private static final String SHA512_WITH_EC = "SHA512withEC";
 
     private static final String DEFAULT_SIGNING_ALGORITHM = "SHA512withRSA";
+    private static final String IDENTITY_CLOUD_ISSUER = "wso2-identity-cloud";
 
     public DefaultJWTGenerator() throws WSUserStoreException {
         signatureAlgorithm = mapSignatureAlgorithm(DEFAULT_SIGNING_ALGORITHM);
@@ -88,15 +89,11 @@ public class DefaultJWTGenerator implements SecurityTokenBuilder {
         long lifetimeInMillis = 60 * 1000;
         long curTimeInMillis = Calendar.getInstance().getTimeInMillis();
 
-        String issuer = "wso2identitycloud";
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet();
-        jwtClaimsSet.setIssuer(issuer);
+        jwtClaimsSet.setIssuer(IDENTITY_CLOUD_ISSUER);
         jwtClaimsSet.setSubject(CarbonContext.getThreadLocalCarbonContext().getUsername());
-        jwtClaimsSet.setAudience(Arrays.asList("audience"));
         jwtClaimsSet.setExpirationTime(new Date(curTimeInMillis + lifetimeInMillis));
         jwtClaimsSet.setIssueTime(new Date(curTimeInMillis));
-        jwtClaimsSet.setJWTID("asasasa");
-//        jwtClaimsSet.setClaim("alg", );
         return signJWTWithRSA(jwtClaimsSet, privateKey);
     }
 

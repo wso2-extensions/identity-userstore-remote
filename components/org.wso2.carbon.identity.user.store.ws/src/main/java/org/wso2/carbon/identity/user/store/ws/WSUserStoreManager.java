@@ -20,9 +20,11 @@ package org.wso2.carbon.identity.user.store.ws;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -131,21 +133,6 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
                 "UTF-8");
     }
 
-    private StringRequestEntity getClaimRetrievalEntity(String[] propertyNames)
-            throws UnsupportedEncodingException {
-
-        StringBuilder attStringBuilder = new StringBuilder("{\"attributes\":[");
-        for (String att : propertyNames) {
-            attStringBuilder.append(", ").append(att);
-        }
-        attStringBuilder.toString().replaceFirst(",", "");
-        attStringBuilder.append("]}");
-
-        return new StringRequestEntity(
-                attStringBuilder.toString(),
-                "application/json",
-                "UTF-8");
-    }
 
     public boolean doAuthenticate(String username, Object credential) throws UserStoreException {
         if (log.isDebugEnabled()) {
@@ -188,20 +175,34 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         return properties;
     }
 
+    private NameValuePair[] getQueryString(String paramName, String[] paramValues) {
+        StringBuilder queryBuilder = new StringBuilder();
+
+        for (String param : paramValues) {
+            queryBuilder.append(",").append(param);
+        }
+
+        NameValuePair param = new NameValuePair(paramName, queryBuilder.toString().replaceFirst(",", ""));
+        NameValuePair[] params = new NameValuePair[] {param};
+
+        return params;
+    }
+
     public Map<String, String> getUserPropertyValues(String userName, String[] propertyNames, String profileName)
             throws UserStoreException {
 
-        PostMethod postRequest = new PostMethod(EndpointUtil.getUserClaimRetrievalEndpoint(getHostName(), userName));
+        GetMethod getMethod = new GetMethod(EndpointUtil.getUserClaimRetrievalEndpoint(getHostName(), userName));
         try {
 
             if (this.httpClient == null) {
                 this.httpClient = new HttpClient();
             }
-            setAuthorizationHeader(postRequest);
-            postRequest.setRequestEntity(getClaimRetrievalEntity(propertyNames));
-            int response = httpClient.executeMethod(postRequest);
+
+            getMethod.setQueryString(getQueryString("attributes", propertyNames));
+            setAuthorizationHeader(getMethod);
+            int response = httpClient.executeMethod(getMethod);
             if (response == HttpStatus.SC_OK) {
-                String respStr = new String(postRequest.getResponseBody());
+                String respStr = new String(getMethod.getResponseBody());
                 JSONObject resultObj = new JSONObject(respStr);
             }
         } catch (IOException | JSONException | WSUserStoreException e) {
