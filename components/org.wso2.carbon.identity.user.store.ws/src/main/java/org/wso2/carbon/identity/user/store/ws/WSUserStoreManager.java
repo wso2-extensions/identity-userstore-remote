@@ -24,7 +24,6 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -133,7 +132,6 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
                 "UTF-8");
     }
 
-
     public boolean doAuthenticate(String username, Object credential) throws UserStoreException {
         if (log.isDebugEnabled()) {
             log.debug("Processing authentication request for tenantId  - [" + this.tenantId + "]");
@@ -183,7 +181,7 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         }
 
         NameValuePair param = new NameValuePair(paramName, queryBuilder.toString().replaceFirst(",", ""));
-        NameValuePair[] params = new NameValuePair[] {param};
+        NameValuePair[] params = new NameValuePair[] { param };
 
         return params;
     }
