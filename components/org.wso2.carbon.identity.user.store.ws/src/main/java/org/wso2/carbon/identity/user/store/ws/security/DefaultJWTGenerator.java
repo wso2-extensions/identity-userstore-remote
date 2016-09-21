@@ -31,7 +31,6 @@ import org.wso2.carbon.identity.user.store.ws.exception.WSUserStoreException;
 
 import java.security.Key;
 import java.security.interfaces.RSAPrivateKey;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -59,26 +58,26 @@ public class DefaultJWTGenerator implements SecurityTokenBuilder {
     protected JWSAlgorithm mapSignatureAlgorithm(String signatureAlgorithm) throws WSUserStoreException {
 
         switch (signatureAlgorithm) {
-            case NONE:
-                return new JWSAlgorithm(JWSAlgorithm.NONE.getName());
-            case SHA256_WITH_RSA:
-                return JWSAlgorithm.RS256;
-            case SHA384_WITH_RSA:
-                return JWSAlgorithm.RS384;
-            case SHA512_WITH_RSA:
-                return JWSAlgorithm.RS512;
-            case SHA256_WITH_HMAC:
-                return JWSAlgorithm.HS256;
-            case SHA384_WITH_HMAC:
-                return JWSAlgorithm.HS384;
-            case SHA512_WITH_HMAC:
-                return JWSAlgorithm.HS512;
-            case SHA256_WITH_EC:
-                return JWSAlgorithm.ES256;
-            case SHA384_WITH_EC:
-                return JWSAlgorithm.ES384;
-            case SHA512_WITH_EC:
-                return JWSAlgorithm.ES512;
+        case NONE:
+            return new JWSAlgorithm(JWSAlgorithm.NONE.getName());
+        case SHA256_WITH_RSA:
+            return JWSAlgorithm.RS256;
+        case SHA384_WITH_RSA:
+            return JWSAlgorithm.RS384;
+        case SHA512_WITH_RSA:
+            return JWSAlgorithm.RS512;
+        case SHA256_WITH_HMAC:
+            return JWSAlgorithm.HS256;
+        case SHA384_WITH_HMAC:
+            return JWSAlgorithm.HS384;
+        case SHA512_WITH_HMAC:
+            return JWSAlgorithm.HS512;
+        case SHA256_WITH_EC:
+            return JWSAlgorithm.ES256;
+        case SHA384_WITH_EC:
+            return JWSAlgorithm.ES384;
+        case SHA512_WITH_EC:
+            return JWSAlgorithm.ES512;
         }
         throw new WSUserStoreException("Unsupported Signature Algorithm in identity.xml");
     }
