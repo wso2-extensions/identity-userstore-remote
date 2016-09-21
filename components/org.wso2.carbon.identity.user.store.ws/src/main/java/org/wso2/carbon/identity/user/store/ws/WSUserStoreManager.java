@@ -226,6 +226,8 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
             if (this.httpClient == null) {
                 this.httpClient = new HttpClient();
             }
+
+            getMethod.setQueryString(getQueryString("limit", new String[]{String.valueOf(maxItemLimit)}));
             setAuthorizationHeader(getMethod);
             int response = httpClient.executeMethod(getMethod);
             if (response == HttpStatus.SC_OK) {
