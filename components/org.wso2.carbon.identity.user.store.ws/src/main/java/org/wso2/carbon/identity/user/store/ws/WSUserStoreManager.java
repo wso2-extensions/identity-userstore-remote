@@ -57,7 +57,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WSUserStoreManager extends JDBCUserStoreManager {
 
     private static Log log = LogFactory.getLog(WSUserStoreManager.class);
-    private static final String ENDPOINT = "HostName";
+    private static final String ENDPOINT = "EndPointURL";
+
     private HttpClient httpClient;
     private static Map<Integer, Key> privateKeys = new ConcurrentHashMap<>();
     private static Map<Integer, String> securityTokens = new ConcurrentHashMap<>();
@@ -246,4 +247,33 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         return userList.toArray(new String[userList.size()]);
     }
 
+    public String[] getRoleListOfUser(String userName) throws UserStoreException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Processing getRoleListOfUser request for tenantId  - [" + this.tenantId + "]");
+        }
+        GetMethod getMethod = new GetMethod(EndpointUtil.getUserRolesListEndpoint(getHostName(), userName));
+        List<String> groupList = new ArrayList<>();
+        try {
+
+            if (this.httpClient == null) {
+                this.httpClient = new HttpClient();
+            }
+
+            setAuthorizationHeader(getMethod);
+            int response = httpClient.executeMethod(getMethod);
+            if (response == HttpStatus.SC_OK) {
+                String respStr = new String(getMethod.getResponseBody());
+                JSONObject resultObj = new JSONObject(respStr);
+                JSONArray users = resultObj.getJSONArray("groups");
+                for (int i = 0; i < users.length(); i++) {
+                    groupList.add((String) users.get(i));
+                }
+            }
+        } catch (IOException | JSONException | WSUserStoreException e) {
+            log.error("Error occurred while getting user groups for tenantId - [" + this.tenantId
+                    + "]", e);
+        }
+        return groupList.toArray(new String[groupList.size()]);
+    }
 }

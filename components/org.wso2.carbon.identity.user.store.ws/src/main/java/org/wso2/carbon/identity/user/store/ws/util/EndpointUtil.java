@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.user.store.ws.util;
 public class EndpointUtil {
 
     private final static String USERS_PATH = "/users/";
+    private final static String GROUPS_PATH = "/groups/";
 
     public static String getAuthenticateEndpoint(String hostName) {
         return hostName + "/authenticate";
@@ -31,5 +32,9 @@ public class EndpointUtil {
 
     public static String getUserListEndpoint(String hostName) {
         return hostName + USERS_PATH;
+    }
+
+    public static String getUserRolesListEndpoint(String hostName, String userName) {
+        return hostName + USERS_PATH + userName + GROUPS_PATH;
     }
 }
