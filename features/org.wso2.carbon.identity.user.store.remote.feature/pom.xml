@@ -59,7 +59,7 @@
 
                             <includedFeatures>
                                 <includedFeatureDef>
-                                    org.wso2.carbon.identity:org.wso2.carbon.identity.user.store.remote.server.feature
+                                    org.wso2.carbon.identity.userstore.remote:org.wso2.carbon.identity.user.store.remote.server.feature
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
