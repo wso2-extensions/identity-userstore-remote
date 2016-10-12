@@ -20,10 +20,13 @@ package org.wso2.carbon.identity.user.store.ws.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.identity.user.store.ws.CleanupSchedulerTask;
 import org.wso2.carbon.identity.user.store.ws.WSUserStoreManager;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+
+import java.util.Timer;
 
 /**
  * @scr.component name="cloud.ws.user.store.component" immediate=true
@@ -44,6 +47,7 @@ public class WSUserStoreDSComponent {
             UserStoreManager remoteStoreManager = new WSUserStoreManager();
             ctxt.getBundleContext().registerService(UserStoreManager.class.getName(),
                     remoteStoreManager, null);
+            scheduleCleanupTask();
 
             if (log.isDebugEnabled()) {
                 log.debug("Carbon Remote User Store activated successfully.");
@@ -81,5 +85,11 @@ public class WSUserStoreDSComponent {
             log.debug("RegistryService unset in user Store bundle");
         }
         WSUserStoreComponentHolder.getInstance().setRegistryService(null);
+    }
+
+    private void scheduleCleanupTask(){
+        Timer time = new Timer();
+        CleanupSchedulerTask cleanupSchedulerTask = new CleanupSchedulerTask();
+        time.schedule(cleanupSchedulerTask, 0, 5 * 60 * 60 * 1000);
     }
 }
