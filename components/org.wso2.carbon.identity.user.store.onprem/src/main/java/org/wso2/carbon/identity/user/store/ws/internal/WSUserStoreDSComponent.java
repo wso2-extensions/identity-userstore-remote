@@ -29,10 +29,12 @@ import org.wso2.carbon.user.core.service.RealmService;
 import java.util.Timer;
 
 /**
- * @scr.component name="cloud.ws.user.store.component" immediate=true
+ * @scr.component name="onprem.ws.user.store.component" immediate=true
  * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService" cardinality="1..1"
- * policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
+ * interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService"
+ * unbind="unsetRealmService"
+ * @scr.reference name="registry.service"
  * interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic" bind="setRegistryService"
  * unbind="unsetRegistryService"
