@@ -101,12 +101,6 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         return UserAttributeCache.getInstance().getValueFromCache(cacheKey);
     }
 
-    private void removeUserAttributesFromCache(String userName) {
-
-        UserAttributeCacheKey cacheKey = new UserAttributeCacheKey(userName);
-        UserAttributeCache.getInstance().clearCacheEntry(cacheKey);
-    }
-
     protected void setAuthorizationHeader(HttpMethodBase request) throws WSUserStoreException {
 
         String token;
