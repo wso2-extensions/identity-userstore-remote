@@ -197,14 +197,13 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         }
 
         NameValuePair param = new NameValuePair(paramName, queryBuilder.toString().replaceFirst(",", ""));
-        NameValuePair[] params = new NameValuePair[] { param };
 
-        return params;
+        return new NameValuePair[] { param };
     }
 
     private String[] getAllClaimMapAttributes(ClaimMapping[] claimMappings) {
 
-        List<String> mapAttributes = new ArrayList<String>();
+        List<String> mapAttributes = new ArrayList<>();
         for (ClaimMapping mapping : claimMappings) {
             mapAttributes.add(mapping.getMappedAttribute());
         }
@@ -215,8 +214,8 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
             throws UserStoreException {
 
         UserAttributeCacheEntry cacheEntry = getUserAttributesFromCache(userName);
-        Map<String, String> allUserAttributes = new HashMap<String, String>();
-        Map<String, String> mapAttributes = new HashMap<String, String>();
+        Map<String, String> allUserAttributes = new HashMap<>();
+        Map<String, String> mapAttributes = new HashMap<>();
         if (cacheEntry == null) {
             GetMethod getMethod = new GetMethod(EndpointUtil.getUserClaimRetrievalEndpoint(getHostName(), userName));
             try {
@@ -233,9 +232,9 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
                 if (response == HttpStatus.SC_OK) {
                     String respStr = new String(getMethod.getResponseBody());
                     JSONObject resultObj = new JSONObject(respStr);
-                    Iterator<String> iterator = resultObj.keys();
+                    Iterator iterator = resultObj.keys();
                     while (iterator.hasNext()) {
-                        String key = iterator.next();
+                        String key = (String)iterator.next();
                         allUserAttributes.put(key, (String) resultObj.get(key));
                     }
                     addAttributesToCache(userName, allUserAttributes);

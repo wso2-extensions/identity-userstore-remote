@@ -23,7 +23,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 
 public class WSUserStoreComponentHolder {
 
-    public static WSUserStoreComponentHolder instance = new WSUserStoreComponentHolder();
+    private static WSUserStoreComponentHolder instance = new WSUserStoreComponentHolder();
     private RegistryService registryService;
     private RealmService realmService;
 

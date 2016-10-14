@@ -28,10 +28,6 @@ public class UserAttributeCacheEntry extends CacheEntry {
 
     private Map<String, String> userAttributes;
 
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
-    }
-
     public Map<String, String> getUserAttributes() {
         return userAttributes;
     }
