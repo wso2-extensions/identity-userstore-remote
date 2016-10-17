@@ -40,6 +40,7 @@ public class WSUserStoreComponentHolder {
     }
 
     public RealmService getRealmService() {
+
         return realmService;
     }
 
