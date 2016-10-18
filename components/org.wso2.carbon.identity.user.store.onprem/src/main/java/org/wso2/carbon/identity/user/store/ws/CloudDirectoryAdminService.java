@@ -20,92 +20,47 @@ package org.wso2.carbon.identity.user.store.ws;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.AbstractAdmin;
-import org.wso2.carbon.core.util.KeyStoreManager;
-import sun.misc.BASE64Encoder;
+import org.wso2.carbon.identity.user.store.ws.util.FileUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 
 public class CloudDirectoryAdminService extends AbstractAdmin {
 
     private static Log log = LogFactory.getLog(CloudDirectoryAdminService.class);
-    private final static String APP_PATH = "";
-    private final static String TEMP_PATH = "/resources/tmp/";
 
-    public boolean downloadAgent() {
+    /**
+     * Generate agent zip file
+     *
+     * @return
+     */
+    public String generateAgentFile() {
+
+        String directoryName;
         try {
-            String directoryName = getDirnameInTimestamp();
-            copyAgentFiles(directoryName);
-            copyPublicKey(directoryName);
-            File file = new File(TEMP_PATH + directoryName + "/" + "agent");
-            //file.zip(TEMP_PATH + dirname + "/" + "wso2agent" + ".tgz");
-            //deleteDirectory(TEMP_PATH + dirname + "/" + "agent");
+            FileUtil downloadUtil = new FileUtil();
+            directoryName = FileUtil.getDirectoryNameInTimestamp();
+            downloadUtil.copyFiles(CarbonUtils.getCarbonHome() + FileUtil.AGENT_STATIC_FILES_PATH,
+                    CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName + "/" + "agent" + "/");
+            downloadUtil.copyPublicKey(CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName
+                    + FileUtil.AGENT_SECURITY_FILES_PATH + FileUtil.PUBLIC_KEY_NAME);
+            downloadUtil.zipDirectory(
+                    CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName + "/" + "agent",
+                    CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName + "/"
+                            + FileUtil.AGENT_FILE_NAME);
+            downloadUtil.deleteDirectory(
+                    CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName + "/" + "agent");
         } catch (Exception e) {
-
+            log.error("Error occurred while creating agent zip file.", e);
+            return "";
         }
-    }
-
-    private String getDirnameInTimestamp() {
-        long milliseconds = new Date().getTime();
-        return Long.toString(milliseconds);
+        return CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName + "/" + FileUtil.AGENT_FILE_NAME;
     }
 
 
-    private void deleteDirectory(String dirPath) throws IOException {
-        File directory = new File(APP_PATH + dirPath);
-        FileUtils.deleteDirectory(directory);
-    }
-
-    /**
-     * Copy Static agent files into temporary location
-     *
-     * @param directoryName
-     * @throws IOException
-     */
-    private void copyAgentFiles(String directoryName) throws IOException {
-        File source = new File(APP_PATH + "/resources/agent");
-        File destination = new File(APP_PATH + TEMP_PATH + directoryName + "/" + "agent" + "/");
-        FileUtils.copyDirectory(source, destination);
-    }
-
-    /**
-     * Copy Public key to temporary location
-     *
-     * This method throws General Exception since current keyStoreManager.getDefaultPublicKey() throws Exception
-     * @param directoryName
-     * @throws Exception
-     */
-    private void copyPublicKey(String directoryName) throws Exception{
-        int tenantID = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(tenantID);
-        DataOutputStream dos = null;
-
-        try {
-            File file =  new File(APP_PATH + TEMP_PATH + directoryName + "/agent/conf/security/" + "public.cert");
-            FileOutputStream fos =  new FileOutputStream(file);
-            dos =  new DataOutputStream(fos);
-            byte []keyBytes = keyStoreManager.getDefaultPublicKey().getEncoded();
-            BASE64Encoder encoder= new BASE64Encoder();
-            String encoded = encoder.encodeBuffer(keyBytes);
-            dos.writeBytes(encoded);
-            dos.flush();
-        } finally{
-            try {
-                dos.close();
-            } catch (IOException e) {
-                log.error("Error occurred while closing data stream", e);
-            }
-        }
-    }
 
     public boolean testConnection(String url) {
 

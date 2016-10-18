@@ -20,6 +20,8 @@ package org.wso2.carbon.identity.user.store.ws;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.user.store.ws.util.FileUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +30,6 @@ import java.util.TimerTask;
 public class CleanupSchedulerTask extends TimerTask{
 
     private static Log log = LogFactory.getLog(CleanupSchedulerTask.class);
-    private final static String TMP_DIRECTORY_PATH="repository/deployment/server/jaggeryapps/dashboard/resources/tmp";
 
     public void run() {
         cleanTmpFolder();
@@ -36,7 +37,7 @@ public class CleanupSchedulerTask extends TimerTask{
 
     private void cleanTmpFolder(){
         try {
-            FileUtils.cleanDirectory(new File(TMP_DIRECTORY_PATH));
+            FileUtils.cleanDirectory(new File(CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH));
         } catch (IOException e) {
             log.error("Error occurred while cleaning temp directory", e);
         }
