@@ -31,10 +31,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.user.store.ws.cache.UserAttributeCache;
+import org.wso2.carbon.identity.user.store.ws.cache.UserAttributeCacheEntry;
+import org.wso2.carbon.identity.user.store.ws.cache.UserAttributeCacheKey;
 import org.wso2.carbon.identity.user.store.ws.exception.WSUserStoreException;
+import org.wso2.carbon.identity.user.store.ws.internal.WSUserStoreComponentHolder;
 import org.wso2.carbon.identity.user.store.ws.security.DefaultJWTGenerator;
 import org.wso2.carbon.identity.user.store.ws.security.SecurityTokenBuilder;
 import org.wso2.carbon.identity.user.store.ws.util.EndpointUtil;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.Properties;
 import org.wso2.carbon.user.api.Property;
 import org.wso2.carbon.user.core.UserRealm;
@@ -48,8 +53,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,7 +68,6 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
 
     private HttpClient httpClient;
     private static Map<Integer, Key> privateKeys = new ConcurrentHashMap<>();
-    private static Map<Integer, String> securityTokens = new ConcurrentHashMap<>();
 
     public WSUserStoreManager() {
 
@@ -81,16 +87,25 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         this.httpClient = new HttpClient();
     }
 
+    private void addAttributesToCache(String userName, Map<String, String> attributes) {
+
+        UserAttributeCacheKey cacheKey = new UserAttributeCacheKey(userName);
+        UserAttributeCacheEntry cacheEntry = new UserAttributeCacheEntry();
+        cacheEntry.setUserAttributes(attributes);
+        UserAttributeCache.getInstance().addToCache(cacheKey, cacheEntry);
+    }
+
+    private UserAttributeCacheEntry getUserAttributesFromCache(String userName) {
+
+        UserAttributeCacheKey cacheKey = new UserAttributeCacheKey(userName);
+        return UserAttributeCache.getInstance().getValueFromCache(cacheKey);
+    }
+
     protected void setAuthorizationHeader(HttpMethodBase request) throws WSUserStoreException {
 
         String token;
-        if (!securityTokens.containsKey(tenantId)) {
-            SecurityTokenBuilder securityTokenBuilder = new DefaultJWTGenerator();
-            token = securityTokenBuilder.buildSecurityToken(getTenantPrivateKey(tenantId));
-            securityTokens.put(tenantId, token);
-        } else {
-            token = securityTokens.get(tenantId);
-        }
+        SecurityTokenBuilder securityTokenBuilder = new DefaultJWTGenerator();
+        token = securityTokenBuilder.buildSecurityToken(getTenantPrivateKey(tenantId));
         request.addRequestHeader("Authorization", "Bearer " + token);
     }
 
@@ -182,33 +197,64 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         }
 
         NameValuePair param = new NameValuePair(paramName, queryBuilder.toString().replaceFirst(",", ""));
-        NameValuePair[] params = new NameValuePair[] { param };
 
-        return params;
+        return new NameValuePair[] { param };
+    }
+
+    private String[] getAllClaimMapAttributes(ClaimMapping[] claimMappings) {
+
+        List<String> mapAttributes = new ArrayList<>();
+        for (ClaimMapping mapping : claimMappings) {
+            mapAttributes.add(mapping.getMappedAttribute());
+        }
+        return mapAttributes.toArray(new String[mapAttributes.size()]);
     }
 
     public Map<String, String> getUserPropertyValues(String userName, String[] propertyNames, String profileName)
             throws UserStoreException {
 
-        GetMethod getMethod = new GetMethod(EndpointUtil.getUserClaimRetrievalEndpoint(getHostName(), userName));
-        try {
+        UserAttributeCacheEntry cacheEntry = getUserAttributesFromCache(userName);
+        Map<String, String> allUserAttributes = new HashMap<>();
+        Map<String, String> mapAttributes = new HashMap<>();
+        if (cacheEntry == null) {
+            GetMethod getMethod = new GetMethod(EndpointUtil.getUserClaimRetrievalEndpoint(getHostName(), userName));
+            try {
+                if (this.httpClient == null) {
+                    this.httpClient = new HttpClient();
+                }
 
-            if (this.httpClient == null) {
-                this.httpClient = new HttpClient();
+                ClaimManager claimManager = WSUserStoreComponentHolder.getInstance().getRealmService()
+                        .getBootstrapRealm().getClaimManager();
+                getMethod.setQueryString(getQueryString("attributes",
+                        getAllClaimMapAttributes(claimManager.getAllClaimMappings())));
+                setAuthorizationHeader(getMethod);
+                int response = httpClient.executeMethod(getMethod);
+                if (response == HttpStatus.SC_OK) {
+                    String respStr = new String(getMethod.getResponseBody());
+                    JSONObject resultObj = new JSONObject(respStr);
+                    Iterator iterator = resultObj.keys();
+                    while (iterator.hasNext()) {
+                        String key = (String)iterator.next();
+                        allUserAttributes.put(key, (String) resultObj.get(key));
+                    }
+                    addAttributesToCache(userName, allUserAttributes);
+                }
+            } catch (IOException | JSONException | WSUserStoreException e) {
+                log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
+                        + "]", e);
+                return Collections.EMPTY_MAP;
+            } catch (org.wso2.carbon.user.api.UserStoreException e) {
+                log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
+                        + "]", e);
+                return Collections.EMPTY_MAP;
             }
-
-            getMethod.setQueryString(getQueryString("attributes", propertyNames));
-            setAuthorizationHeader(getMethod);
-            int response = httpClient.executeMethod(getMethod);
-            if (response == HttpStatus.SC_OK) {
-                String respStr = new String(getMethod.getResponseBody());
-                JSONObject resultObj = new JSONObject(respStr);
-            }
-        } catch (IOException | JSONException | WSUserStoreException e) {
-            log.error("Error occurred while calling backed to authenticate request for tenantId - [" + this.tenantId
-                    + "]", e);
+        } else {
+            allUserAttributes = cacheEntry.getUserAttributes();
         }
-        return new HashMap<String, String>();
+        for (String propertyName : propertyNames) {
+            mapAttributes.put(propertyName, allUserAttributes.get(propertyName));
+        }
+        return mapAttributes;
     }
 
     public Date getPasswordExpirationTime(String userName) throws UserStoreException {

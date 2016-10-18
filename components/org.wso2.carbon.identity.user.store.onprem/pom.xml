@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 
   WSO2 Inc. licenses this file to you under the Apache License,
   Version 2.0 (the "License"); you may not use this file except
@@ -37,40 +37,33 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.api</artifactId>
-            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
-            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.um.ws.api</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
-            <version>${carbon.kernel.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.wso2.orbit.com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>${nimbusds.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
-            <version>${orbit.version.json}</version>
         </dependency>
 
         <dependency>
@@ -80,16 +73,18 @@
         </dependency>
 
         <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
-            <version>${carbon.identity.framework.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.user.store.configuration</artifactId>
+        </dependency>
 
         <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
-            <artifactId>org.wso2.carbon.identity.user.store.configuration</artifactId>
-            <version>${carbon.identity.framework.version}</version>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.application.common</artifactId>
         </dependency>
     </dependencies>
 
@@ -110,6 +105,10 @@
                         <Private-Package>
                             org.wso2.carbon.identity.user.store.ws.internal,
                         </Private-Package>
+                        <Import-Package>
+                            org.wso2.carbon.identity.application.common.*;version="${carbon.identity.framework.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.core.*;version="${carbon.identity.framework.imp.pkg.version.range}",
+                        </Import-Package>
 
 
                         <Export-Package>
