@@ -23,12 +23,44 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.AbstractAdmin;
+import org.wso2.carbon.identity.user.store.ws.util.FileUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.IOException;
 
 public class CloudDirectoryAdminService extends AbstractAdmin {
 
     private static Log log = LogFactory.getLog(CloudDirectoryAdminService.class);
+
+    /**
+     * Generate agent zip file
+     *
+     * @return
+     */
+    public String generateAgentFile() {
+
+        String directoryName;
+        try {
+            FileUtil downloadUtil = new FileUtil();
+            directoryName = FileUtil.getDirectoryNameInTimestamp();
+            downloadUtil.copyFiles(CarbonUtils.getCarbonHome() + FileUtil.AGENT_STATIC_FILES_PATH,
+                    CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName + "/" + "agent" + "/");
+            downloadUtil.copyPublicKey(CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName
+                    + FileUtil.AGENT_SECURITY_FILES_PATH + FileUtil.PUBLIC_KEY_NAME);
+            downloadUtil.zipDirectory(
+                    CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName + "/" + "agent",
+                    CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName + "/"
+                            + FileUtil.AGENT_FILE_NAME);
+            downloadUtil.deleteDirectory(
+                    CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName + "/" + "agent");
+        } catch (Exception e) {
+            log.error("Error occurred while creating agent zip file.", e);
+            return "";
+        }
+        return CarbonUtils.getCarbonHome() + FileUtil.AGENT_TEMP_PATH + directoryName + "/" + FileUtil.AGENT_FILE_NAME;
+    }
+
+
 
     public boolean testConnection(String url) {
 
