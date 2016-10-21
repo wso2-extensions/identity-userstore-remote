@@ -37,4 +37,8 @@ public class EndpointUtil {
     public static String getUserRolesListEndpoint(String hostName, String userName) {
         return hostName + USERS_PATH + userName + GROUPS_PATH;
     }
+
+    public static String getRoleListEndpoint(String hostName) {
+        return hostName + GROUPS_PATH;
+    }
 }
