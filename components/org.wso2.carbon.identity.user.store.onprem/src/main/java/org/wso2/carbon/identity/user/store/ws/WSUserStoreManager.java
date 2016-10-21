@@ -347,7 +347,7 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
             }
 
         } catch (IOException | JSONException | WSUserStoreException e) {
-            log.error("Error occurred while doGetRoleNames for tenantId - [" + this.tenantId
+            log.error("Error occurred while do get role names for tenantId - [" + this.tenantId
                     + "]", e);
         }
         return roleList.toArray(new String[roleList.size()]);
