@@ -322,4 +322,34 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         }
         return groupList.toArray(new String[groupList.size()]);
     }
+
+    public String[] doGetRoleNames(String filter, int maxItemLimit) throws UserStoreException {
+        if (log.isDebugEnabled()) {
+            log.debug("Processing doGetRoleNames request for tenantId  - [" + this.tenantId + "]");
+        }
+        GetMethod getMethod = new GetMethod(EndpointUtil.getRoleListEndpoint(getHostName()));
+        List<String> roleList = new ArrayList<>();
+        try {
+
+            if (this.httpClient == null) {
+                this.httpClient = new HttpClient();
+            }
+
+            setAuthorizationHeader(getMethod);
+            int response = httpClient.executeMethod(getMethod);
+            if (response == HttpStatus.SC_OK) {
+                String respStr = new String(getMethod.getResponseBody());
+                JSONObject resultObj = new JSONObject(respStr);
+                JSONArray groups = resultObj.getJSONArray("roles");
+                for (int i = 0; i < groups.length(); i++) {
+                    roleList.add((String) groups.get(i));
+                }
+            }
+
+        } catch (IOException | JSONException | WSUserStoreException e) {
+            log.error("Error occurred while get role names for tenantId - [" + this.tenantId
+                    + "]", e);
+        }
+        return roleList.toArray(new String[roleList.size()]);
+    }
 }
