@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import sun.misc.BASE64Encoder;
 
 import java.io.DataOutputStream;
@@ -30,6 +31,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.KeyStore;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -90,14 +94,27 @@ public class FileUtil {
      */
     public void copyPublicKey(String publicKeyPath) throws Exception{
         int tenantID = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(tenantID);
         DataOutputStream dos = null;
+        KeyStore keyStore;
+        PublicKey publicKey;
 
         try {
             File file =  new File(publicKeyPath);
             FileOutputStream fos =  new FileOutputStream(file);
             dos =  new DataOutputStream(fos);
-            byte []keyBytes = keyStoreManager.getDefaultPublicKey().getEncoded();
+
+            if(tenantID != MultitenantConstants.SUPER_TENANT_ID) {
+                keyStore = keyStoreManager.getKeyStore(generateKSNameFromDomainName(tenantDomain));
+                Certificate publicCert = keyStore.getCertificate(tenantDomain); //Default keystore alias = tenantDomain name
+                publicKey = publicCert.getPublicKey();
+            } else {
+                publicKey = keyStoreManager.getDefaultPublicKey();
+
+            }
+
+            byte []keyBytes = publicKey.getEncoded();
             BASE64Encoder encoder= new BASE64Encoder();
             String encoded = encoder.encodeBuffer(keyBytes);
             dos.writeBytes(encoded);
@@ -109,6 +126,11 @@ public class FileUtil {
                 log.error("Error occurred while closing data stream", e);
             }
         }
+    }
+
+    private static String generateKSNameFromDomainName(String tenantDomain) {
+        String ksName = tenantDomain.trim().replace(".", "-");
+        return ksName + ".jks";
     }
 
     /**
