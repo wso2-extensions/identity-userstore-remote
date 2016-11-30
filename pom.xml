@@ -103,6 +103,12 @@
             <artifactId>org.wso2.carbon.um.ws.api</artifactId>
             <version>${um.ws.api.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.1.1</version>
+        </dependency>
     </dependencies>
     </dependencyManagement>
 

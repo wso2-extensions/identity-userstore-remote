@@ -26,6 +26,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.tomcat.jdbc.pool.DataSource;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,26 +43,27 @@ import org.wso2.carbon.identity.user.store.ws.util.EndpointUtil;
 import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.Properties;
 import org.wso2.carbon.user.api.Property;
+import org.wso2.carbon.user.api.RealmConfiguration;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.claim.ClaimManager;
-import org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
+import org.wso2.carbon.user.core.common.RoleContext;
 import org.wso2.carbon.user.core.profile.ProfileConfigurationManager;
+import org.wso2.carbon.user.core.tenant.Tenant;
+import org.wso2.carbon.user.core.util.DatabaseUtil;
+import org.wso2.carbon.user.core.util.JDBCRealmUtil;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class WSUserStoreManager extends JDBCUserStoreManager {
+public class WSUserStoreManager extends AbstractUserStoreManager {
 
     private static Log log = LogFactory.getLog(WSUserStoreManager.class);
     private static final String ENDPOINT = "EndPointURL";
@@ -73,6 +75,53 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
 
     }
 
+    /**
+     * @param realmConfig
+     * @param tenantId
+     * @throws UserStoreException
+     */
+    public WSUserStoreManager(RealmConfiguration realmConfig, int tenantId) throws UserStoreException {
+        this.realmConfig = realmConfig;
+        this.tenantId = tenantId;
+
+        if (realmConfig.getUserStoreProperty(UserCoreConstants.RealmConfig.READ_GROUPS_ENABLED) != null) {
+            readGroupsEnabled = Boolean.parseBoolean(realmConfig
+                    .getUserStoreProperty(UserCoreConstants.RealmConfig.READ_GROUPS_ENABLED));
+        }
+
+        if (log.isDebugEnabled()) {
+            if (readGroupsEnabled) {
+                log.debug("ReadGroups is enabled for " + getMyDomainName());
+            } else {
+                log.debug("ReadGroups is disabled for " + getMyDomainName());
+            }
+        }
+
+        if (realmConfig.getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED) != null) {
+            writeGroupsEnabled = Boolean.parseBoolean(realmConfig
+                    .getUserStoreProperty(UserCoreConstants.RealmConfig.WRITE_GROUPS_ENABLED));
+        } else {
+            if (!isReadOnly()) {
+                writeGroupsEnabled = true;
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            if (writeGroupsEnabled) {
+                log.debug("WriteGroups is enabled for " + getMyDomainName());
+            } else {
+                log.debug("WriteGroups is disabled for " + getMyDomainName());
+            }
+        }
+
+        if (writeGroupsEnabled) {
+            readGroupsEnabled = true;
+        }
+
+	/* Initialize user roles cache as implemented in AbstractUserStoreManager */
+        initUserRolesCache();
+    }
+
     public WSUserStoreManager(org.wso2.carbon.user.api.RealmConfiguration realmConfig,
             Map<String, Object> properties,
             ClaimManager claimManager,
@@ -80,11 +129,41 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
             UserRealm realm, Integer tenantId)
             throws UserStoreException {
 
-        super(realmConfig, properties, claimManager, profileManager, realm, tenantId, false);
+        this(realmConfig, tenantId);
         this.realmConfig = realmConfig;
         this.tenantId = tenantId;
         this.userRealm = realm;
         this.httpClient = new HttpClient();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Started " + System.currentTimeMillis());
+        }
+        this.claimManager = claimManager;
+        this.userRealm = realm;
+
+        dataSource = (DataSource) properties.get(UserCoreConstants.DATA_SOURCE);
+        if (dataSource == null) {
+            dataSource = DatabaseUtil.getRealmDataSource(realmConfig);
+        }
+        if (dataSource == null) {
+            throw new UserStoreException("User Management Data Source is null");
+        }
+
+        properties.put(UserCoreConstants.DATA_SOURCE, dataSource);
+        realmConfig.setUserStoreProperties(JDBCRealmUtil.getSQL(realmConfig.getUserStoreProperties()));
+
+        this.persistDomain();
+        doInitialSetup();
+        if (realmConfig.isPrimary()) {
+            addInitialAdminData(Boolean.parseBoolean(realmConfig.getAddAdmin()),
+                    !isInitSetupDone());
+        }
+
+        initUserRolesCache();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Ended " + System.currentTimeMillis());
+        }
     }
 
     private void addAttributesToCache(String userName, Map<String, String> attributes) {
@@ -175,6 +254,67 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         return authStatus;
     }
 
+    @Override
+    protected void doAddUser(String userName, Object credential, String[] roleList, Map<String, String> claims,
+                             String profileName, boolean requirePasswordChange) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doAddUser");
+
+    }
+
+    @Override
+    protected void doUpdateCredential(String userName, Object newCredential, Object oldCredential) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doUpdateCredential");
+
+    }
+
+    @Override
+    protected void doUpdateCredentialByAdmin(String userName, Object newCredential) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doUpdateCredentialByAdmin");
+
+    }
+
+    @Override
+    protected void doDeleteUser(String userName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doDeleteUser");
+
+    }
+
+    @Override
+    protected void doSetUserClaimValue(String userName, String claimURI, String claimValue, String profileName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doSetUserClaimValue");
+
+    }
+
+    @Override
+    protected void doSetUserClaimValues(String userName, Map<String, String> claims, String profileName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doSetUserClaimValues");
+
+    }
+
+    @Override
+    protected void doDeleteUserClaimValue(String userName, String claimURI, String profileName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doDeleteUserClaimValue");
+
+    }
+
+    @Override
+    protected void doDeleteUserClaimValues(String userName, String[] claims, String profileName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doDeleteUserClaimValues");
+
+    }
+
+    @Override
+    protected void doUpdateUserListOfRole(String roleName, String[] deletedUsers, String[] newUsers) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doUpdateUserListOfRole");
+
+    }
+
+    @Override
+    protected void doUpdateRoleListOfUser(String userName, String[] deletedRoles, String[] newRoles) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doUpdateRoleListOfUser");
+
+    }
+
     public Properties getDefaultUserStoreProperties() {
 
         Properties properties = new Properties();
@@ -257,7 +397,110 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         return mapAttributes;
     }
 
+    //Todo: Implement doCheckExistingRole
+    @Override
+    protected boolean doCheckExistingRole(String roleName) throws UserStoreException {
+        return true;
+    }
+
+    @Override
+    protected RoleContext createRoleContext(String roleName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #createRoleContext");
+    }
+
+    //Todo: Implement doCheckExistingUser
+    @Override
+    protected boolean doCheckExistingUser(String userName) throws UserStoreException {
+        return true;
+    }
+
+    @Override
+    protected String[] getUserListFromProperties(String property, String value, String profileName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #getUserListFromProperties");
+    }
+
+    @Override
+    public String[] getProfileNames(String userName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #getProfileNames");
+    }
+
+    @Override
+    public String[] getAllProfileNames() throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #getAllProfileNames");
+    }
+
+    @Override
+    public boolean isReadOnly() throws UserStoreException {
+        if ("true".equalsIgnoreCase(realmConfig
+                .getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_READ_ONLY))) {
+            return true;
+        }
+        return false;
+    }
+
     public Date getPasswordExpirationTime(String userName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #getPasswordExpirationTime");
+    }
+
+    @Override
+    public int getUserId(String username) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #getUserId");
+    }
+
+    @Override
+    public int getTenantId(String username) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #getTenantId");
+    }
+
+    @Override
+    public int getTenantId() throws UserStoreException {
+        return this.tenantId;
+    }
+
+    @Override
+    public Map<String, String> getProperties(org.wso2.carbon.user.api.Tenant tenant) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #getProperties");
+    }
+
+    @Override
+    public boolean isMultipleProfilesAllowed() {
+        return false;
+    }
+
+    @Override
+    public void addRememberMe(String s, String s1) throws org.wso2.carbon.user.api.UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #addRememberMe");
+
+    }
+
+    @Override
+    public boolean isValidRememberMeToken(String s, String s1) throws org.wso2.carbon.user.api.UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #isValidRememberMeToken");
+    }
+
+    @Override
+    public Map<String, String> getProperties(Tenant tenant) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #getProperties");
+    }
+
+    @Override
+    public boolean isBulkImportSupported() {
+        return new Boolean(this.realmConfig.getUserStoreProperty("IsBulkImportSupported")).booleanValue();
+    }
+
+    @Override
+    public RealmConfiguration getRealmConfiguration() {
+        return this.realmConfig;
+    }
+
+    @Override
+    protected String[] doGetSharedRoleNames(String tenantDomain, String filter, int maxItemLimit) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doGetSharedRoleNames");
+    }
+
+    //Todo: Implement doGetUserListOfRole
+    @Override
+    protected String[] doGetUserListOfRole(String roleName, String filter) throws UserStoreException {
         return null;
     }
 
@@ -282,7 +525,12 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
                 JSONObject resultObj = new JSONObject(respStr);
                 JSONArray users = resultObj.getJSONArray("usernames");
                 for (int i = 0; i < users.length(); i++) {
-                    userList.add((String) users.get(i));
+                    String user = (String) users.get(i);
+                    if(!"wso2.anonymous.user".equals(user)) {
+                        String domain = this.realmConfig.getUserStoreProperty("DomainName");
+                        user = UserCoreUtil.addDomainToName(user, domain);
+                    }
+                    userList.add(user);
                 }
             }
 
@@ -293,7 +541,30 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         return userList.toArray(new String[userList.size()]);
     }
 
-    public String[] getRoleListOfUser(String userName) throws UserStoreException {
+    @Override
+    protected String[] doGetDisplayNamesForInternalRole(String[] userNames) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doGetDisplayNamesForInternalRole");
+    }
+
+    @Override
+    public boolean doCheckIsUserInRole(String userName, String roleName) throws UserStoreException {
+        String[] roles = this.doGetExternalRoleListOfUser(userName, "*");
+        if(roles != null) {
+            String[] arr$ = roles;
+            int len$ = roles.length;
+
+            for(int i$ = 0; i$ < len$; ++i$) {
+                String role = arr$[i$];
+                if(role.equalsIgnoreCase(roleName)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public String[] doGetExternalRoleListOfUser(String userName, String filter) throws UserStoreException {
 
         if (log.isDebugEnabled()) {
             log.debug("Processing getRoleListOfUser request for tenantId  - [" + this.tenantId + "]");
@@ -323,6 +594,29 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         return groupList.toArray(new String[groupList.size()]);
     }
 
+    @Override
+    protected String[] doGetSharedRoleListOfUser(String userName, String tenantDomain, String filter) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doGetSharedRoleListOfUser");
+    }
+
+    @Override
+    protected void doAddRole(String roleName, String[] userList, boolean shared) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doAddRole");
+
+    }
+
+    @Override
+    protected void doDeleteRole(String roleName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doDeleteRole");
+
+    }
+
+    @Override
+    protected void doUpdateRoleName(String roleName, String newRoleName) throws UserStoreException {
+        throw new UserStoreException("UserStoreManager method not supported : #doUpdateRoleName");
+
+    }
+
     public String[] doGetRoleNames(String filter, int maxItemLimit) throws UserStoreException {
         if (log.isDebugEnabled()) {
             log.debug("Processing doGetRoleNames request for tenantId  - [" + this.tenantId + "]");
@@ -330,7 +624,6 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         GetMethod getMethod = new GetMethod(EndpointUtil.getRoleListEndpoint(getHostName()));
         List<String> roleList = new ArrayList<>();
         try {
-
             if (this.httpClient == null) {
                 this.httpClient = new HttpClient();
             }
@@ -340,9 +633,12 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
             if (response == HttpStatus.SC_OK) {
                 String respStr = new String(getMethod.getResponseBody());
                 JSONObject resultObj = new JSONObject(respStr);
-                JSONArray groups = resultObj.getJSONArray("roles");
+                JSONArray groups = resultObj.getJSONArray("groups");
+                String userStoreDomain = this.realmConfig.getUserStoreProperty("DomainName");
                 for (int i = 0; i < groups.length(); i++) {
-                    roleList.add((String) groups.get(i));
+                    String roleName = (String)groups.get(i);
+                    roleName = UserCoreUtil.addDomainToName(roleName, userStoreDomain);
+                    roleList.add(roleName);
                 }
             }
 
@@ -352,4 +648,5 @@ public class WSUserStoreManager extends JDBCUserStoreManager {
         }
         return roleList.toArray(new String[roleList.size()]);
     }
+
 }
