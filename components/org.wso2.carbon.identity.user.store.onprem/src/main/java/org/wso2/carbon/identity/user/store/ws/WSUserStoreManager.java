@@ -222,7 +222,7 @@ public class WSUserStoreManager extends AbstractUserStoreManager {
     private StringRequestEntity getAuthenticateEntity(String userName, Object password)
             throws UnsupportedEncodingException {
         return new StringRequestEntity(
-                "{\"username\":" + userName + ",\"password\":" + password + "}",
+                "{\"username\":\"" + userName + "\",\"password\":\"" + password + "\"}",
                 "application/json",
                 "UTF-8");
     }
