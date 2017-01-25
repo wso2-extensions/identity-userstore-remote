@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.identity.userstore.onprem</groupId>
     <artifactId>identity-userstore-onprem</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon OnPrem Userstore Module</name>
     <description>
@@ -40,7 +40,7 @@
         <url>https://github.com/wso2-extensions/identity-userstore-remote.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/identity-userstore-remote.git</developerConnection>
         <connection>scm:git:https://github.com/wso2-extensions/identity-userstore-remote.git</connection>
-        <tag>v1.0.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
 
