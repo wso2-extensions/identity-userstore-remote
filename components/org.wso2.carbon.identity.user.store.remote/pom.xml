@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 
   WSO2 Inc. licenses this file to you under the Apache License,
@@ -15,22 +14,18 @@
   KIND, either express or implied. See the License for the
   specific language governing permissions and limitations
   under the License.
-  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.carbon.identity.userstore.remote</groupId>
         <artifactId>identity-userstore-remote</artifactId>
         <relativePath>../../pom.xml</relativePath>
         <version>5.1.4-SNAPSHOT</version>
     </parent>
-
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.identity.user.store.remote</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon Remote Userstore</name>
     <description>WSO2 Carbon Remote Userstore</description>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
@@ -57,7 +52,6 @@
             <artifactId>org.wso2.carbon.logging</artifactId>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -92,7 +86,14 @@
                     </instructions>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
-
 </project>
