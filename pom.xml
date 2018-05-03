@@ -177,7 +177,7 @@
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
 	<jacoco.maven.plugin.version>0.8.0</jacoco.maven.plugin.version>
-	<jacoco.maven.plugin.version>2.21.0</jacoco.maven.plugin.version>
+	<maven.surefire.plugin.version>2.21.0</maven.surefire.plugin.version>
     </properties>
     <build>
         <pluginManagement>
@@ -227,7 +227,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.maven.plugin.version}0.8.0</version>
+                    <version>${jacoco.maven.plugin.version}</version>
                     <executions>
                         <execution>
                             <id>default-prepare-agent-by-coverage-enforcer</id>
