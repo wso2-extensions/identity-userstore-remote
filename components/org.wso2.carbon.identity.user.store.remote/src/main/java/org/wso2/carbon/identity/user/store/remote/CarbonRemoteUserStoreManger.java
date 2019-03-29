@@ -110,16 +110,10 @@ public class CarbonRemoteUserStoreManger implements UserStoreManager {
                 "Remote Sever Username#Name of a user from the remote server, having enough privileges for user management",
                 null);
         Property password = new Property(PASSWORD, "",
-                "Remote Server Password#The password correspoing to the remote server " +
-                        "username#encrypt",
-                null);
-        Property serverUrls = new Property(
-                SERVER_URLS,
-                "",
+                "Remote Server Password#The password correspond to the remote server " + "username#encrypt", null);
+        Property serverUrls = new Property(SERVER_URLS, "",
                 "Remote Server URL(s)#Remote server URLs. e.g.: https://ca-datacenter/services,https://va-datacenter/services",
                 null);
-        Property disabled = new Property("Disabled", "false", "Disabled#Check to disable the user store", null);
-
         Property passwordJavaScriptRegEx = new Property(
                 UserStoreConfigConstants.passwordJavaScriptRegEx, "^[\\S]{5,30}$",
                 "Password RegEx (Javascript)#"
@@ -135,7 +129,14 @@ public class CarbonRemoteUserStoreManger implements UserStoreManager {
 
         mandatoryProperties = new Property[] {remoteServerUserName, password, serverUrls, passwordJavaScriptRegEx,
                 usernameJavaScriptRegEx, roleNameJavaScriptRegEx};
-        optionalProperties = new Property[] {disabled};
+
+        Property disabledProp = new Property(UserStoreConfigConstants.disabled, "false",
+                "Disabled#" + UserStoreConfigConstants.disabledDescription, null);
+        Property readGroupsProp = new Property(UserStoreConfigConstants.readGroups, "true",
+                "Read Groups#Indicate whether read groups enabled", null);
+        Property writeGroupsProp = new Property(UserStoreConfigConstants.writeGroups, "true",
+                "Write Groups#" + UserStoreConfigConstants.writeGroupsDescription, null);
+        optionalProperties = new Property[] { disabledProp, readGroupsProp, writeGroupsProp };
 
         properties.setOptionalProperties(optionalProperties);
         properties.setMandatoryProperties(mandatoryProperties);
