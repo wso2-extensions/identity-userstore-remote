@@ -159,25 +159,25 @@
     </pluginRepositories>
     <properties>
         <identity.userstore.remote.version>${project.version}</identity.userstore.remote.version>
-        <carbon.kernel.version>4.4.7</carbon.kernel.version>
-        <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
+        <carbon.kernel.version>4.5.0-m1</carbon.kernel.version>
+        <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
         <carbon.user.api.imp.pkg.version.range>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version.range>
-        <axis2.wso2.version>1.6.1.wso2v12</axis2.wso2.version>
-        <axis2.osgi.version.range>[1.6.1.wso2v12, 2.0.0)</axis2.osgi.version.range>
-        <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v37</axis2.wso2.version>
+        <axis2.osgi.version.range>[1.6.1-wso2v37, 2.0.0)</axis2.osgi.version.range>
+        <axiom.wso2.version>1.2.11-wso2v16</axiom.wso2.version>
         <org.slf4j.verison>1.6.1</org.slf4j.verison>
         <commons-logging.osgi.version.range>[1.2,2.0)</commons-logging.osgi.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
-        <identity.user.ws.version>5.1.3</identity.user.ws.version>
-        <identity.user.ws.package.import.version.range>[5.0.0, 6.0.0)</identity.user.ws.package.import.version.range>
+        <identity.user.ws.version>5.2.0</identity.user.ws.version>
+        <identity.user.ws.package.import.version.range>[5.2.0, 6.0.0)</identity.user.ws.package.import.version.range>
         <maven.scr.plugin.version>1.7.2</maven.scr.plugin.version>
         <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
         <maven.compiler.plugin.version>2.3.1</maven.compiler.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
-	<jacoco.maven.plugin.version>0.8.0</jacoco.maven.plugin.version>
-	<maven.surefire.plugin.version>2.21.0</maven.surefire.plugin.version>
+        <jacoco.maven.plugin.version>0.8.0</jacoco.maven.plugin.version>
+        <maven.surefire.plugin.version>2.21.0</maven.surefire.plugin.version>
     </properties>
     <build>
         <pluginManagement>
