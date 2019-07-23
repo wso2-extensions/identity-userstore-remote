@@ -101,16 +101,6 @@
                 <version>${axiom.wso2.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.logging</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${org.slf4j.verison}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.carbon.identity.userstore.remote</groupId>
                 <artifactId>org.wso2.carbon.identity.user.store.remote</artifactId>
                 <version>${project.version}</version>
@@ -120,6 +110,13 @@
                 <artifactId>org.wso2.carbon.identity.user.store.remote.server.feature</artifactId>
                 <version>${project.version}</version>
                 <type>zip</type>
+            </dependency>
+
+            <!-- Pax Logging -->
+            <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-api</artifactId>
+                <version>${pax.logging.api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -165,8 +162,7 @@
         <axis2.wso2.version>1.6.1-wso2v37</axis2.wso2.version>
         <axis2.osgi.version.range>[1.6.1-wso2v37, 2.0.0)</axis2.osgi.version.range>
         <axiom.wso2.version>1.2.11-wso2v16</axiom.wso2.version>
-        <org.slf4j.verison>1.6.1</org.slf4j.verison>
-        <commons-logging.osgi.version.range>[1.2,2.0)</commons-logging.osgi.version.range>
+        <commons-logging.osgi.version.range>[1.2.0,2.0.0)</commons-logging.osgi.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <identity.user.ws.version>5.2.0</identity.user.ws.version>
@@ -178,6 +174,8 @@
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
         <jacoco.maven.plugin.version>0.8.0</jacoco.maven.plugin.version>
         <maven.surefire.plugin.version>2.21.0</maven.surefire.plugin.version>
+        <!-- Pax Logging Version -->
+        <pax.logging.api.version>1.10.1</pax.logging.api.version>
     </properties>
     <build>
         <pluginManagement>
