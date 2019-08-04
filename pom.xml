@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
-        <version>1</version>
+        <version>1.2</version>
     </parent>
     <groupId>org.wso2.carbon.identity.userstore.remote</groupId>
     <modelVersion>4.0.0</modelVersion>
@@ -101,16 +101,6 @@
                 <version>${axiom.wso2.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.logging</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${org.slf4j.verison}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.carbon.identity.userstore.remote</groupId>
                 <artifactId>org.wso2.carbon.identity.user.store.remote</artifactId>
                 <version>${project.version}</version>
@@ -120,6 +110,13 @@
                 <artifactId>org.wso2.carbon.identity.user.store.remote.server.feature</artifactId>
                 <version>${project.version}</version>
                 <type>zip</type>
+            </dependency>
+
+            <!-- Pax Logging -->
+            <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-api</artifactId>
+                <version>${pax.logging.api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -159,42 +156,29 @@
     </pluginRepositories>
     <properties>
         <identity.userstore.remote.version>${project.version}</identity.userstore.remote.version>
-        <carbon.kernel.version>4.5.0-m1</carbon.kernel.version>
+        <carbon.kernel.version>4.5.0-m3</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
         <carbon.user.api.imp.pkg.version.range>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version.range>
         <axis2.wso2.version>1.6.1-wso2v37</axis2.wso2.version>
         <axis2.osgi.version.range>[1.6.1-wso2v37, 2.0.0)</axis2.osgi.version.range>
         <axiom.wso2.version>1.2.11-wso2v16</axiom.wso2.version>
-        <org.slf4j.verison>1.6.1</org.slf4j.verison>
-        <commons-logging.osgi.version.range>[1.2,2.0)</commons-logging.osgi.version.range>
+        <commons-logging.osgi.version.range>[1.2.0,2.0.0)</commons-logging.osgi.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
-        <identity.user.ws.version>5.2.0</identity.user.ws.version>
-        <identity.user.ws.package.import.version.range>[5.2.0, 6.0.0)</identity.user.ws.package.import.version.range>
-        <maven.scr.plugin.version>1.7.2</maven.scr.plugin.version>
-        <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
+        <identity.user.ws.version>5.3.0</identity.user.ws.version>
+        <identity.user.ws.package.import.version.range>[5.3.0, 6.0.0)</identity.user.ws.package.import.version.range>
+        <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
         <maven.compiler.plugin.version>2.3.1</maven.compiler.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
         <jacoco.maven.plugin.version>0.8.0</jacoco.maven.plugin.version>
         <maven.surefire.plugin.version>2.21.0</maven.surefire.plugin.version>
+        <!-- Pax Logging Version -->
+        <pax.logging.api.version>1.10.1</pax.logging.api.version>
     </properties>
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>${maven.scr.plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>generate-scr-scrdescriptor</id>
-                            <goals>
-                                <goal>scr</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
@@ -286,6 +270,25 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <!--This parameter disables doclint-->
+                            <doclint>none</doclint>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
