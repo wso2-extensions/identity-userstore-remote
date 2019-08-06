@@ -23,38 +23,46 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.identity.user.store.remote.CarbonRemoteUserStoreManger;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-/**
- * @scr.component name="remote.user.store.mgt.dscomponent" immediate=true
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService" cardinality="1..1"
- * policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- */
+@Component(
+         name = "remote.user.store.mgt.dscomponent", 
+         immediate = true)
 public class CarbonRemoteUserStoreDSComponent {
+
     private static Log log = LogFactory.getLog(CarbonRemoteUserStoreDSComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctxt) {
         try {
-
             UserStoreManager remoteStoreManager = new CarbonRemoteUserStoreManger();
-            ctxt.getBundleContext().registerService(UserStoreManager.class.getName(),
-                    remoteStoreManager, null);
-
+            ctxt.getBundleContext().registerService(UserStoreManager.class.getName(), remoteStoreManager, null);
             if (log.isDebugEnabled()) {
                 log.debug("Carbon Remote User Store activated successfully.");
             }
-
         } catch (Exception e) {
             log.error("Failed to activate Carbon Remote User Store activated successfully ", e);
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext ctxt) {
         if (log.isDebugEnabled()) {
             log.debug("Carbon Carbon Remote User Store is deactivated ");
         }
     }
 
+    @Reference(
+             name = "user.realmservice.default", 
+             service = org.wso2.carbon.user.core.service.RealmService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRealmService")
     protected void setRealmService(RealmService rlmService) {
         return;
     }
@@ -62,5 +70,5 @@ public class CarbonRemoteUserStoreDSComponent {
     protected void unsetRealmService(RealmService realmService) {
         return;
     }
-
 }
+
