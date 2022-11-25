@@ -100,8 +100,8 @@
         <commons-logging.osgi.version.range>[1.2.0,2.0.0)</commons-logging.osgi.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
-        <identity.user.ws.version>5.4.0</identity.user.ws.version>
-        <identity.user.ws.package.import.version.range>[5.3.3, 6.0.0)</identity.user.ws.package.import.version.range>
+        <identity.user.ws.version>6.0.0</identity.user.ws.version>
+        <identity.user.ws.package.import.version.range>[6.0.0, 7.0.0)</identity.user.ws.package.import.version.range>
         <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
         <maven.compiler.plugin.version>2.3.1</maven.compiler.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
