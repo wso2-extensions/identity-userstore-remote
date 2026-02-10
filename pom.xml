@@ -100,7 +100,7 @@
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
         <carbon.user.api.imp.pkg.version.range>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version.range>
         <axis2.wso2.version>1.6.1-wso2v38</axis2.wso2.version>
-        <axis2.osgi.version.range>[1.6.1-wso2v38, 2.0.0)</axis2.osgi.version.range>
+        <axis2.osgi.version.range>[1.6.1, 2.0.0)</axis2.osgi.version.range>
         <axiom.wso2.version>1.2.11-wso2v16</axiom.wso2.version>
         <commons-logging.osgi.version.range>[1.2.0,2.0.0)</commons-logging.osgi.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
